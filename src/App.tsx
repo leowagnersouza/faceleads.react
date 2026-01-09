@@ -1,57 +1,80 @@
 import { useState } from 'react'
 import './App.css'
 import {
-  AppBar,
   Box,
-  Button,
-  Container,
-  IconButton,
-  Toolbar,
-  Typography,
+  CssBaseline,
+  Divider,
+  Drawer,
   List,
   ListItem,
+  ListItemButton,
+  ListItemIcon,
   ListItemText,
-  Paper,
+  Toolbar,
+  Typography,
 } from '@mui/material'
-import MenuIcon from '@mui/icons-material/Menu'
+import PeopleIcon from '@mui/icons-material/People'
+import ListAltIcon from '@mui/icons-material/ListAlt'
+
+const drawerWidth = 240
 
 function App() {
-  const [leads] = useState([
-    { id: '1', name: 'João Silva', source: 'Facebook', createdAt: '2025-12-09' },
-    { id: '2', name: 'Maria Souza', source: 'Instagram', createdAt: '2025-12-09' },
-  ])
+  const [active, setActive] = useState<'consultores' | 'leads'>('leads')
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <AppBar position="static">
-        <Toolbar>
-          <IconButton size="large" edge="start" color="inherit" sx={{ mr: 2 }}>
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            faceleads — Gestão de Leads
-          </Typography>
-          <Button color="inherit">Nova Lead</Button>
-        </Toolbar>
-      </AppBar>
+    <Box sx={{ display: 'flex' }}>
+      <CssBaseline />
 
-      <Container sx={{ py: 3 }}>
-        <Typography variant="h5" gutterBottom>
-          Leads recentes
-        </Typography>
-        <Paper variant="outlined">
+      {/* Permanent drawer */}
+      <Drawer
+        variant="permanent"
+        sx={{
+          width: drawerWidth,
+          flexShrink: 0,
+          [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: 'border-box' },
+        }}
+      >
+        <Toolbar />
+        <Box sx={{ overflow: 'auto' }}>
           <List>
-            {leads.map((lead) => (
-              <ListItem key={lead.id} divider>
-                <ListItemText
-                  primary={`${lead.name} — ${lead.source}`}
-                  secondary={`Recebido em ${lead.createdAt}`}
-                />
-              </ListItem>
-            ))}
+            <ListItem disablePadding>
+              <ListItemButton selected={active === 'consultores'} onClick={() => setActive('consultores')}>
+                <ListItemIcon>
+                  <PeopleIcon />
+                </ListItemIcon>
+                <ListItemText primary="Consultores" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton selected={active === 'leads'} onClick={() => setActive('leads')}>
+                <ListItemIcon>
+                  <ListAltIcon />
+                </ListItemIcon>
+                <ListItemText primary="Leads" />
+              </ListItemButton>
+            </ListItem>
           </List>
-        </Paper>
-      </Container>
+          <Divider />
+        </Box>
+      </Drawer>
+
+      {/* Main content */}
+      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+        <Toolbar />
+        <Box
+          sx={{
+            minHeight: 'calc(100vh - 64px)',
+            display: 'flex',
+            alignItems: 'flex-start',
+            justifyContent: 'center',
+            pt: 4,
+          }}
+        >
+          <Typography variant="h3" component="h1" sx={{ fontWeight: 600 }}>
+            faceleads
+          </Typography>
+        </Box>
+      </Box>
     </Box>
   )
 }

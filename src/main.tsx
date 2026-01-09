@@ -3,6 +3,8 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import LoginForm from './components/LoginForm'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -16,7 +18,12 @@ createRoot(document.getElementById('root')!).render(
       })}
     >
       <CssBaseline />
-      <App />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<LoginForm />} />
+          <Route path="/" element={<App />} />
+        </Routes>
+      </BrowserRouter>
     </ThemeProvider>
   </StrictMode>,
 )
