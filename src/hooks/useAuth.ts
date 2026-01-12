@@ -15,7 +15,12 @@ export function useAuth() {
       setAuthed(true)
       return true
     } catch (e: any) {
-      setError(e?.message || 'Falha no login')
+      const status = e?.response?.status
+      if (status === 401) {
+        setError('Login ou senha inválidos')
+      } else {
+        setError(e?.message || 'Falha no login')
+      }
       setAuthed(false)
       return false
     } finally {

@@ -3,14 +3,10 @@
 
 import axios, { type AxiosError, type AxiosInstance, type InternalAxiosRequestConfig } from 'axios'
 import { getAccessToken, getRefreshToken, setTokens, clearTokens } from './auth'
+import { getApiBaseUrl } from './env'
 import type { Result, TokenResponse } from '../types/api'
 
-function getBaseUrl(): string {
-  // Guard 'process' for Vite/Browser where 'process' is undefined
-  const fromCRA = typeof process !== 'undefined' ? (process as any)?.env?.REACT_APP_API_BASE_URL : undefined
-  const fromVite = (import.meta as any)?.env?.VITE_API_BASE_URL
-  return (fromCRA || fromVite || '').toString()
-}
+// Base URL comes from centralized env helper
 
 export class ApiError extends Error {
   code?: string
@@ -23,7 +19,7 @@ export class ApiError extends Error {
   }
 }
 
-const apiClient: AxiosInstance = axios.create({ baseURL: getBaseUrl() })
+const apiClient: AxiosInstance = axios.create({ baseURL: getApiBaseUrl() })
 
 // Attach Authorization header if access token exists
 apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
@@ -46,7 +42,7 @@ function onRefreshed(token: string | null) {
   pendingQueue = []
 }
 
-const refreshClient = axios.create({ baseURL: getBaseUrl() }) // no interceptors
+const refreshClient = axios.create({ baseURL: getApiBaseUrl() }) // no interceptors
 
 apiClient.interceptors.response.use(
   (response) => {
