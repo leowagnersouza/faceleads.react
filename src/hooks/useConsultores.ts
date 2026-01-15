@@ -15,6 +15,7 @@ export function useConsultores() {
       const { data } = await apiClient.get<Consultor[]>('/api/v1/consultores')
       setData(data)
     } catch (e: any) {
+      console.error('Erro ao buscar consultores:', e.response?.status, e.response?.data, e.message)
       setError(e?.message || 'Erro ao carregar consultores')
     } finally {
       setLoading(false)

@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Alert, Button, Paper, Stack, TextField, Typography, Snackbar } from '@mui/material'
 import useAuth from '../hooks/useAuth'
 import { getApiBaseUrl } from '../services/env'
 
 // Minimal login form using useAuth
 export default function LoginForm() {
+  const navigate = useNavigate()
   const { login, loading, error } = useAuth()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -19,7 +21,10 @@ export default function LoginForm() {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    await login(username, password)
+    const result = await login(username, password)
+    if (result) {
+      navigate('/')
+    }
   }
 
   return (
