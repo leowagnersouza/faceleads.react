@@ -9,18 +9,18 @@ export interface Result<T> {
 }
 
 export interface Consultor {
-  Id: string
-  NomeCompleto: string
-  Email: string
-  Telefone?: string
-  Ativo: boolean
-  CriadoEmUtc: string // ISO string from server
+  id: string
+  nomeCompleto: string
+  email: string
+  telefone?: string
+  ativo: boolean
+  criadoEmUtc: string // ISO string from server
 }
 
 export interface CreateConsultorCommand {
-  NomeCompleto: string
-  Email: string
-  Telefone?: string
+  nomeCompleto: string
+  email: string
+  telefone?: string
 }
 
 export interface TokenResponse {

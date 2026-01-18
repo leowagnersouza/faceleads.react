@@ -26,7 +26,7 @@ const drawerWidth = 240
 function App() {
   const navigate = useNavigate()
   const { logout } = useAuth()
-  const [active, setActive] = useState<'consultores' | 'leads'>('leads')
+  const [active, setActive] = useState<'consultores' | 'leads'>('consultores')
 
   const handleLogout = async () => {
     await logout()
