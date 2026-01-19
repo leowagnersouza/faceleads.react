@@ -12,16 +12,16 @@ Crie dois secrets:
 
 | Nome | Valor |
 |------|-------|
-| `EMAIL_SENDER` | Seu email Outlook (ex: seu-email@outlook.com) |
-| `EMAIL_PASSWORD` | Sua senha ou token de aplicativo Outlook |
+| `EMAIL_SENDER` | Seu email (ex: seu-email@gmail.com) |
+| `EMAIL_PASSWORD` | Sua senha ou App Password do Gmail |
 
-### 2. Obter Token de Aplicativo Outlook
+### 2. Obter App Password do Gmail
 
-Se usar autenticação de dois fatores no Outlook:
+Se usar autenticação de dois fatores no Gmail (recomendado):
 
-1. Acesse: https://account.microsoft.com/security/app-passwords
-2. Selecione "Mail" e "Windows"
-3. Copie a senha gerada (16 caracteres)
+1. Acesse: https://myaccount.google.com/security
+2. Em "Signing in to Google" selecione "App passwords"
+3. Crie uma senha do app para "Mail" e copie os 16 caracteres
 4. Use essa senha como `EMAIL_PASSWORD` no secret
 
 ### 3. Testar
