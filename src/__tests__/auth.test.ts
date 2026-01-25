@@ -18,7 +18,7 @@ describe('auth service', () => {
 
   it('login stores tokens', async () => {
     mockedAxios.create.mockReturnValue(mockedAxios as any)
-    mockedAxios.post.mockResolvedValue({ data: { access_token: 'a', refresh_token: 'r' } })
+    mockedAxios.post.mockResolvedValue({ data: { success: true, value: { access_token: 'a', refresh_token: 'r' } } })
 
     const res = await auth.login('u', 'p')
     expect(res.access_token).toBe('a')

@@ -1,11 +1,19 @@
 // Types for Faceleads API v1
 // Keep names aligned with the .NET DTOs to avoid mapping churn.
 
+// API envelope (camelCase) esperado pelo frontend
 export interface Result<T> {
-  Success: boolean
-  Value?: T
-  ErrorCode?: string
-  ErrorMessage?: string
+  success: boolean
+  value?: T
+  errorCode?: string
+  errorMessage?: string
+}
+
+// Normalized error object used by hooks/services.
+// Keep lightweight; map from server envelope when available.
+export interface AppError {
+  message: string
+  errorCode?: string
 }
 
 export interface Consultor {

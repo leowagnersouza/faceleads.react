@@ -1,10 +1,12 @@
 // Central axios client with Authorization + refresh-on-401.
-// Handles .NET Result<T> errors by throwing a typed Error.
+// Observação: o frontend espera envelopes camelCase `Result<T>` do backend
+// com as chaves: `success`, `value`, `errorCode`, `errorMessage`.
+// O cliente desenbrulha automaticamente quando `success=true`.
 
 import axios, { type AxiosError, type AxiosInstance, type InternalAxiosRequestConfig } from 'axios'
 import { getAccessToken, getRefreshToken, setTokens, clearTokens } from './auth'
 import { getApiBaseUrl } from './env'
-import type { Result, TokenResponse } from '../types/api'
+import type { TokenResponse } from '../types/api'
 
 // Base URL comes from centralized env helper
 
@@ -46,15 +48,16 @@ const refreshClient = axios.create({ baseURL: getApiBaseUrl() }) // no intercept
 
 apiClient.interceptors.response.use(
   (response) => {
-    // If API returns Result envelope, surface an error when Success=false
-    const maybeResult = response.data as Result<unknown>
-    if (maybeResult && typeof maybeResult === 'object' && 'Success' in maybeResult) {
-      if (maybeResult.Success === false) {
-        throw new ApiError(maybeResult.ErrorMessage || 'Operação falhou', {
-          code: maybeResult.ErrorCode,
+    // Unwrap camelCase Result<T> envelopes
+    const body = response.data as any
+    if (body && typeof body === 'object' && 'success' in body) {
+      if (body.success === false) {
+        throw new ApiError(body.errorMessage || 'Operação falhou', {
+          code: body.errorCode,
           status: response.status,
         })
       }
+      return { ...response, data: body.value }
     }
     return response
   },
@@ -89,15 +92,22 @@ apiClient.interceptors.response.use(
       originalRequest._retry = true
       isRefreshing = true
       try {
-        const { data } = await refreshClient.post<TokenResponse>('/api/v1/refresh', {
+        const { data } = await refreshClient.post('/api/v1/refresh', {
           RefreshToken: refresh,
         })
-        setTokens(data.access_token, data.refresh_token)
-        onRefreshed(data.access_token)
+        if (!data?.success || !data?.value) {
+          throw new ApiError(data?.errorMessage || 'Falha ao renovar token', {
+            code: data?.errorCode,
+            status: 401,
+          })
+        }
+        const tokens = data.value as TokenResponse
+        setTokens(tokens.access_token, tokens.refresh_token)
+        onRefreshed(tokens.access_token)
 
         // Update header and retry original
         originalRequest.headers = originalRequest.headers ?? {}
-        originalRequest.headers['Authorization'] = `Bearer ${data.access_token}`
+        originalRequest.headers['Authorization'] = `Bearer ${tokens.access_token}`
         return apiClient(originalRequest)
       } catch (refreshErr) {
         onRefreshed(null)
@@ -111,11 +121,11 @@ apiClient.interceptors.response.use(
 
     // If response body is Result with error
     const res = error.response
-    const maybeResult = res?.data as Result<unknown>
-    if (maybeResult && typeof maybeResult === 'object' && 'Success' in maybeResult) {
+    const bodyErr = res?.data as any
+    if (bodyErr && typeof bodyErr === 'object' && 'success' in bodyErr && bodyErr.success === false) {
       return Promise.reject(
-        new ApiError(maybeResult.ErrorMessage || 'Erro da API', {
-          code: maybeResult.ErrorCode,
+        new ApiError(bodyErr.errorMessage || 'Erro da API', {
+          code: bodyErr.errorCode,
           status: res?.status,
         }),
       )

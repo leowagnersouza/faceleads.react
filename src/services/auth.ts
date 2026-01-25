@@ -3,7 +3,8 @@
 // NOTE: For production, consider httpOnly cookies + secure storage.
 
 import axios from 'axios'
-import type { TokenResponse, Result } from '../types/api'
+import type { TokenResponse } from '../types/api'
+import { ApiError } from './api'
 import { getApiBaseUrl } from './env'
 
 const REFRESH_KEY = 'faceleads_refresh_token'
@@ -42,12 +43,20 @@ export async function login(username: string, password: string): Promise<TokenRe
   const baseURL = getApiBaseUrl()
   // Use a raw axios instance here to avoid any interceptor side-effects
   const client = axios.create({ baseURL })
-  const { data } = await client.post<TokenResponse>('/api/v1/login', {
+  const { data } = await client.post('/api/v1/login', {
     Username: username,
     Password: password,
   })
-  setTokens(data.access_token, data.refresh_token)
-  return data
+  // Espera envelope camelCase: { success, value, errorMessage, errorCode }
+  if (!data?.success || !data?.value) {
+    throw new ApiError(data?.errorMessage || 'Falha no login', {
+      code: data?.errorCode,
+      status: 401,
+    })
+  }
+  const tokens = data.value as TokenResponse
+  setTokens(tokens.access_token, tokens.refresh_token)
+  return tokens
 }
 
 export async function logout(): Promise<void> {
@@ -56,7 +65,13 @@ export async function logout(): Promise<void> {
   const refresh = getRefreshToken()
   try {
     if (refresh) {
-      await client.post<Result<unknown>>('/api/v1/logout', { RefreshToken: refresh })
+      const { data } = await client.post('/api/v1/logout', { RefreshToken: refresh })
+      if (data?.success === false) {
+        throw new ApiError(data?.errorMessage || 'Falha ao sair', {
+          code: data?.errorCode,
+          status: 400,
+        })
+      }
     }
   } finally {
     clearTokens()

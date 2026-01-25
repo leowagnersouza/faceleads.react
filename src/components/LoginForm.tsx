@@ -49,7 +49,7 @@ export default function LoginForm() {
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       >
         <Alert severity="error" variant="filled" onClose={() => setSnackOpen(false)}>
-          {error || 'Erro no login'}
+          {error?.message || 'Erro no login'}
         </Alert>
       </Snackbar>
     </Paper>

@@ -1,10 +1,12 @@
 // useAuth: simple auth state hook wrapping auth service
 import { useCallback, useMemo, useState } from 'react'
 import { login as svcLogin, logout as svcLogout, isAuthenticated } from '../services/auth'
+import type { AppError } from '../types/api'
+import { ApiError } from '../services/api'
 
 export function useAuth() {
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<AppError | null>(null)
   const [authed, setAuthed] = useState<boolean>(isAuthenticated())
 
   const login = useCallback(async (username: string, password: string) => {
@@ -16,11 +18,12 @@ export function useAuth() {
       return true
     } catch (e: any) {
       const status = e?.response?.status
-      if (status === 401) {
-        setError('Login ou senha inválidos')
-      } else {
-        setError(e?.message || 'Falha no login')
-      }
+      const appErr: AppError = e instanceof ApiError
+        ? { message: e.message, errorCode: e.code }
+        : status === 401
+          ? { message: 'Login ou senha inválidos' }
+          : { message: e?.message || 'Falha no login' }
+      setError(appErr)
       setAuthed(false)
       return false
     } finally {
@@ -35,7 +38,10 @@ export function useAuth() {
       await svcLogout()
       setAuthed(false)
     } catch (e: any) {
-      setError(e?.message || 'Falha ao sair')
+      const appErr: AppError = e instanceof ApiError
+        ? { message: e.message, errorCode: e.code }
+        : { message: e?.message || 'Falha ao sair' }
+      setError(appErr)
     } finally {
       setLoading(false)
     }

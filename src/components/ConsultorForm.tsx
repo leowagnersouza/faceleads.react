@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Button, Paper, Stack, TextField, Typography } from '@mui/material'
-import apiClient from '../services/api'
-import type { CreateConsultorCommand, Consultor, Result } from '../types/api'
+import apiClient, { ApiError } from '../services/api'
+import type { CreateConsultorCommand, Consultor, AppError } from '../types/api'
 
 // Minimal create form; on success, calls optional callback
 export default function ConsultorForm(props: { onCreated?: (c: Consultor) => void }) {
@@ -9,7 +9,7 @@ export default function ConsultorForm(props: { onCreated?: (c: Consultor) => voi
   const [email, setEmail] = useState('')
   const [telefone, setTelefone] = useState('')
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<AppError | null>(null)
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -17,15 +17,18 @@ export default function ConsultorForm(props: { onCreated?: (c: Consultor) => voi
     setError(null)
     try {
       const payload: CreateConsultorCommand = { NomeCompleto: nome, Email: email, Telefone: telefone || undefined }
-      const { data } = await apiClient.post<Result<Consultor>>('/api/v1/consultores', payload)
-      if (!data.Success || !data.Value) throw new Error(data.ErrorMessage || 'Falha ao criar consultor')
-      props.onCreated?.(data.Value)
+      const { data } = await apiClient.post<Consultor>('/api/v1/consultores', payload)
+      if (!data) throw new Error('Falha ao criar consultor')
+      props.onCreated?.(data)
       setNome('')
       setEmail('')
       setTelefone('')
     } catch (e: any) {
       // TODO: map ErrorCode->mensagem amigável
-      setError(e?.message || 'Erro ao criar consultor')
+      const appErr: AppError = e instanceof ApiError
+        ? { message: e.message, errorCode: e.code }
+        : { message: e?.message || 'Erro ao criar consultor' }
+      setError(appErr)
     } finally {
       setLoading(false)
     }
@@ -40,7 +43,7 @@ export default function ConsultorForm(props: { onCreated?: (c: Consultor) => voi
         <TextField label="Telefone" value={telefone} onChange={(e) => setTelefone(e.target.value)} fullWidth />
         {error && (
           <Typography color="error" variant="body2">
-            {error}
+            {error.message}
           </Typography>
         )}
         <Button variant="contained" type="submit" disabled={loading}>
