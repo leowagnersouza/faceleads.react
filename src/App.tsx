@@ -41,7 +41,7 @@ function App() {
       <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
         <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
           <Typography variant="h6" noWrap>
-            faceleads
+            LeadSaude
           </Typography>
           <Button color="inherit" onClick={handleLogout}>
             Sair
