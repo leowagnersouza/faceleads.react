@@ -42,6 +42,18 @@ export default defineConfig([
   },
 ])
 ```
+## Configuração da API (Ambiental)
+
+- Defina `VITE_API_BASE_URL` para apontar ao endpoint remoto em produção.
+- Em produção, se a variável não estiver definida, o cliente usa o mesmo `origin` do site (útil com proxy reverso).
+- Em desenvolvimento, se a variável não estiver definida, o cliente volta para `http://localhost:5293`.
+
+Exemplo de `.env`:
+
+```
+VITE_API_BASE_URL=https://api.seu-dominio.com
+```
+
 
 You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
