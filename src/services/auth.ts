@@ -8,8 +8,10 @@ import { ApiError } from './api'
 import { getApiBaseUrl } from './env'
 
 const REFRESH_KEY = 'faceleads_refresh_token'
+const TENANT_NAME_KEY = 'faceleads_tenant_name'
 
 let accessTokenMemory: string | null = null
+let tenantNameMemory: string | null = null
 
 export function getAccessToken(): string | null {
   return accessTokenMemory
@@ -18,6 +20,17 @@ export function getAccessToken(): string | null {
 export function getRefreshToken(): string | null {
   try {
     return localStorage.getItem(REFRESH_KEY)
+  } catch {
+    return null
+  }
+}
+
+export function getTenantName(): string | null {
+  if (tenantNameMemory) return tenantNameMemory
+  try {
+    const v = localStorage.getItem(TENANT_NAME_KEY)
+    tenantNameMemory = v
+    return v
   } catch {
     return null
   }
@@ -34,8 +47,10 @@ export function setTokens(access: string, refresh: string) {
 
 export function clearTokens() {
   accessTokenMemory = null
+  tenantNameMemory = null
   try {
     localStorage.removeItem(REFRESH_KEY)
+    localStorage.removeItem(TENANT_NAME_KEY)
   } catch {}
 }
 
@@ -56,6 +71,13 @@ export async function login(username: string, password: string): Promise<TokenRe
   }
   const tokens = data.value as TokenResponse
   setTokens(tokens.access_token, tokens.refresh_token)
+  // Capture tenant name
+  if (tokens.tenant_name) {
+    tenantNameMemory = tokens.tenant_name
+    try {
+      localStorage.setItem(TENANT_NAME_KEY, tokens.tenant_name)
+    } catch {}
+  }
   return tokens
 }
 

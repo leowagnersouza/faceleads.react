@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './App.css'
 import {
@@ -19,19 +19,28 @@ import {
 import PeopleIcon from '@mui/icons-material/People'
 import ListAltIcon from '@mui/icons-material/ListAlt'
 import useAuth from './hooks/useAuth'
+import { getTenantName } from './services/auth'
 import ConsultorList from './components/ConsultorList'
 
 const drawerWidth = 240
 
 function App() {
   const navigate = useNavigate()
-  const { logout } = useAuth()
+  const { logout, isAuthenticated } = useAuth()
   const [active, setActive] = useState<'consultores' | 'leads'>('consultores')
+  const [tenantName, setTenantName] = useState<string | null>(getTenantName())
 
   const handleLogout = async () => {
     await logout()
     navigate('/login')
+    setTenantName(null)
   }
+
+  // Update tenant name when auth state changes (e.g., after login)
+  // Ensures header reflects current tenant without manual refresh
+  useEffect(() => {
+    setTenantName(getTenantName())
+  }, [isAuthenticated])
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -40,9 +49,11 @@ function App() {
       {/* App Bar with logout button */}
       <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
         <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Typography variant="h6" noWrap>
-            LeadSaude
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
+            <Typography variant="h6" noWrap>
+              {`LeadSaude${tenantName ? ' — ' + tenantName : ''}`}
+            </Typography>
+          </Box>
           <Button color="inherit" onClick={handleLogout}>
             Sair
           </Button>
