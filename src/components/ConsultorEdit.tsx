@@ -23,6 +23,8 @@ export default function ConsultorEdit() {
 
   const [form, setForm] = useState<Partial<Consultor>>({})
   const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [toggling, setToggling] = useState(false)
   const [snack, setSnack] = useState<{ open: boolean; severity: 'success' | 'error'; message: string }>({
     open: false,
     severity: 'success',
@@ -53,10 +55,46 @@ export default function ConsultorEdit() {
     }
   }
 
+  const onToggleActive = async (checked: boolean) => {
+    if (!id) return
+    setToggling(true)
+    try {
+      const url = checked
+        ? `/api/v1/consultores/${id}/ativar`
+        : `/api/v1/consultores/${id}/desativar`
+      await apiClient.patch(url)
+      setForm((s) => ({ ...s, ativo: checked }))
+      setSnack({ open: true, severity: 'success', message: checked ? 'Consultor ativado' : 'Consultor desativado' })
+    } catch (e: any) {
+      setSnack({ open: true, severity: 'error', message: e?.message || 'Erro ao alterar status' })
+      // Revert UI state
+      setForm((s) => ({ ...s, ativo: !checked }))
+    } finally {
+      setToggling(false)
+    }
+  }
+
+  const onDelete = async () => {
+    if (!id) return
+    const ok = window.confirm('Confirmar exclusão (soft-delete) deste consultor?')
+    if (!ok) return
+    setDeleting(true)
+    try {
+      // Soft-delete via API (DELETE endpoint assumed to perform soft-delete)
+      await apiClient.delete(`/api/v1/consultores/${id}`)
+      setSnack({ open: true, severity: 'success', message: 'Consultor excluído' })
+      navigate('/')
+    } catch (e: any) {
+      setSnack({ open: true, severity: 'error', message: e?.message || 'Erro ao excluir' })
+    } finally {
+      setDeleting(false)
+    }
+  }
+
   if (loading) return <CircularProgress />
   if (error)
     return (
-      <Typography color="error">{error}</Typography>
+      <Typography color="error">{error.message}</Typography>
     )
 
   return (
@@ -69,11 +107,18 @@ export default function ConsultorEdit() {
           <TextField label="Telefone" value={form.telefone ?? ''} onChange={(e) => onChange('telefone', e.target.value)} fullWidth />
           <Stack direction="row" alignItems="center" spacing={1}>
             <Typography>Ativo</Typography>
-            <Switch checked={!!form.ativo} onChange={(e) => onChange('ativo', e.target.checked)} />
+            <Switch
+              checked={!!form.ativo}
+              onChange={(e) => onToggleActive(e.target.checked)}
+              disabled={saving || deleting || toggling}
+            />
           </Stack>
 
           <Stack direction="row" spacing={2} justifyContent="flex-end">
             <Button variant="outlined" onClick={() => navigate('/')}>Cancelar</Button>
+            <Button color="error" variant="outlined" onClick={onDelete} disabled={deleting || saving}>
+              {deleting ? 'Excluindo...' : 'Excluir'}
+            </Button>
             <Button variant="contained" onClick={onSave} disabled={saving}>
               {saving ? 'Salvando...' : 'Salvar'}
             </Button>

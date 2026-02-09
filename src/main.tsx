@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import LoginForm from './components/LoginForm'
 import ProtectedRoute from './components/ProtectedRoute'
 import ConsultorEdit from './components/ConsultorEdit'
+import ConsultorCreate from './components/ConsultorCreate'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -28,6 +29,14 @@ createRoot(document.getElementById('root')!).render(
             element={
               <ProtectedRoute>
                 <App />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/consultores/novo"
+            element={
+              <ProtectedRoute>
+                <ConsultorCreate />
               </ProtectedRoute>
             }
           />

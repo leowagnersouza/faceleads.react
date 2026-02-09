@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { Button, Paper, Stack, TextField, Typography } from '@mui/material'
 import apiClient, { ApiError } from '../services/api'
-import type { CreateConsultorCommand, Consultor, AppError } from '../types/api'
+import type { CreateConsultorCommand, AppError, Consultor } from '../types/api'
 
 // Minimal create form; on success, calls optional callback
-export default function ConsultorForm(props: { onCreated?: (c: Consultor) => void }) {
+export default function ConsultorForm(props: { onCreated?: () => void }) {
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
   const [telefone, setTelefone] = useState('')
@@ -16,10 +16,10 @@ export default function ConsultorForm(props: { onCreated?: (c: Consultor) => voi
     setLoading(true)
     setError(null)
     try {
-      const payload: CreateConsultorCommand = { NomeCompleto: nome, Email: email, Telefone: telefone || undefined }
+      const payload: CreateConsultorCommand = { nomeCompleto: nome, email: email, telefone: telefone || undefined }
       const { data } = await apiClient.post<Consultor>('/api/v1/consultores', payload)
       if (!data) throw new Error('Falha ao criar consultor')
-      props.onCreated?.(data)
+      props.onCreated?.()
       setNome('')
       setEmail('')
       setTelefone('')

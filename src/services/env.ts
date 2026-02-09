@@ -6,7 +6,7 @@
 export const API_BASE_URL = 'https://faceleads-api-dev.azurewebsites.net'
 
 // Local
-// export const API_BASE_URL = 'http://localhost:5293'
+//export const API_BASE_URL = 'https://localhost:7062'
 
 export function getApiBaseUrl(): string {
 	return API_BASE_URL
