@@ -21,6 +21,7 @@ import ListAltIcon from '@mui/icons-material/ListAlt'
 import useAuth from './hooks/useAuth'
 import { getTenantName } from './services/auth'
 import ConsultorList from './components/ConsultorList'
+import LeadsKanban from './components/LeadsKanban'
 
 const drawerWidth = 240
 
@@ -97,11 +98,7 @@ function App() {
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <Toolbar />
         {active === 'consultores' && <ConsultorList />}
-        {active === 'leads' && (
-          <Box sx={{ display: 'flex', justifyContent: 'center', pt: 4 }}>
-            <Typography variant="h5">Leads — em breve</Typography>
-          </Box>
-        )}
+        {active === 'leads' && <LeadsKanban />}
       </Box>
     </Box>
   )
